@@ -1,10 +1,7 @@
 name = "gripsta"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+main = "dist/server/index.mjs"
 
 [site]
-bucket = ".output/public"
-
-[[rules]]
-type = "ESModule"
-globs = ["**/*.mjs"]
+bucket = "dist/client"
