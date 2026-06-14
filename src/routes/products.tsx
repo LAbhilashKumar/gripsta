@@ -57,7 +57,7 @@ function ProductsPage() {
               {filters.map(f => (
                 <button
                   key={f.id}
-                  onClick={() => navigate({ search: prev => ({ ...prev, cat: f.id }) })}
+                  onClick={() => navigate({ search: (prev: Search) => ({ ...prev, cat: f.id }) })}
                   className={`text-left px-4 py-2.5 border text-sm uppercase tracking-widest transition-colors ${
                     cat === f.id ? "border-primary text-primary bg-primary/5" : "border-border text-foreground/70 hover:border-border-hover hover:text-foreground"
                   }`}
@@ -72,7 +72,7 @@ function ProductsPage() {
             <h3 className="label-accent mt-8 mb-4">Sort</h3>
             <select
               value={sort}
-              onChange={e => navigate({ search: prev => ({ ...prev, sort: e.target.value as Search["sort"] }) })}
+              onChange={e => navigate({ search: (prev: Search) => ({ ...prev, sort: e.target.value as Search["sort"] }) })}
               className="w-full bg-surface border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
             >
               <option value="default">Default</option>
