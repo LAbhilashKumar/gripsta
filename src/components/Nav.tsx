@@ -5,7 +5,7 @@ import { useCart } from "@/lib/cart";
 
 const links = [
   { label: "Products", to: "/products" },
-  { label: "Categories", to: "/products", hash: "categories" },
+  { label: "Categories", to: "/Categories", hash: "categories" },
   { label: "Why Us", to: "/about", hash: "why" },
   { label: "Applications", to: "/about", hash: "applications" },
   { label: "Dealers", to: "/dealer" },
