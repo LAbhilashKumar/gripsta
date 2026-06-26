@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { CATEGORIES, PRODUCTS, type Category } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
       { title: "Products — Gripsta Hardware" },
-      { name: "description", content: "Browse Gripsta hinges, channels, tandem systems, pullouts and more — premium hardware for builders, dealers and designers." },
+      { name: "description", content: "Browse Gripsta hinges, channels, tandem systems, pullouts and more — premium hardware for builders and designers." },
     ],
   }),
   component: ProductsPage,
@@ -56,26 +56,30 @@ function ProductsPage() {
                   key={f.id}
                   onClick={() => navigate({ search: (prev: Search) => ({ ...prev, cat: f.id }) })}
                   className={`text-left px-4 py-2.5 border text-sm uppercase tracking-widest transition-colors ${
-                    cat === f.id ? "border-primary text-primary bg-primary/5" : "border-border text-foreground/70 hover:border-border-hover hover:text-foreground"
+                    cat === f.id
+                      ? "border-primary text-primary bg-primary/5"
+                      : "border-border text-foreground/70 hover:border-border-hover hover:text-foreground"
                   }`}
                 >{f.label}</button>
               ))}
             </div>
             <h3 className="label-accent mt-8 mb-4">Search</h3>
             <input
-              type="text" placeholder="Search products..." value={query} onChange={e => setQuery(e.target.value)}
+              type="text"
+              placeholder="Search products..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
               className="w-full bg-surface border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
             />
           </aside>
 
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-muted-foreground">Showing {list.length} products</p>
-              <Link to="/catalog" className="text-sm text-primary hover:underline">Download Catalog →</Link>
-            </div>
+            <p className="text-sm text-muted-foreground mb-6">Showing {list.length} products</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {list.map((p, i) => (
-                <Reveal key={p.id} delay={i * 40}><ProductCard product={p} /></Reveal>
+                <Reveal key={p.id} delay={i * 40}>
+                  <ProductCard product={p} hideViewButton />
+                </Reveal>
               ))}
             </div>
             {list.length === 0 && (
