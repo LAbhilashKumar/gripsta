@@ -47,7 +47,7 @@ function Home() {
     { name: "Office Interiors", desc: "Contract-grade hardware", img: "linear-gradient(135deg,#1c1c1c,#1c1010)" },
     { name: "Living Room Furniture", desc: "Lid stays & gas springs", img: "linear-gradient(135deg,#1a1a1a,#221818)" },
     { name: "Hotels & Hospitality", desc: "50,000-cycle tested durability", img: "linear-gradient(135deg,#1c1c1c,#2a1a1a)" },
-    { name: "POP & Drywall", desc: "Bugle-head screws, 3 finishes", img: "linear-gradient(135deg,#181818,#221818)" },
+    { name: "POP & Drywall", desc: "Bugle-head screws, multiple finishes", img: "linear-gradient(135deg,#181818,#221818)" },
   ];
 
   return (
@@ -63,7 +63,7 @@ function Home() {
             <span className="text-primary">LAST.</span>
           </h1>
           <p className="mt-8 max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed">
-            Premium hinges, drawer systems, drywall screws and architectural hardware — engineered for precision and built for modern interiors.
+            Premium hinges, drawer systems, channels and architectural hardware — engineered for precision and built for modern interiors.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link to="/products" className="btn-primary">Explore Products →</Link>
@@ -73,8 +73,8 @@ function Home() {
             {[
               { v: 80000, s: "+", l: "Installations" },
               { v: 50000, s: "+", l: "Cycle Tested" },
-              { v: 80, s: "+", l: "Products" },
-              { v: 48, s: "+ hrs", l: "Salt Spray Tested" },
+              { v: 80,    s: "+", l: "Products" },
+              { v: 48,    s: "+", l: "Hrs Salt Spray Tested" },
             ].map(s => (
               <div key={s.l}>
                 <Counter to={s.v} suffix={s.s} />
@@ -143,11 +143,11 @@ function Home() {
             <span className="label-accent">Engineering Promise</span>
             <h2 className="font-display text-5xl md:text-6xl mt-3">WHY CHOOSE GRIPSTA</h2>
           </Reveal>
-          <div className="mt-12 grid md:grid-cols-2 gap-5">
+          <div className="mt-12 grid md:grid-cols-3 gap-5">
             {[
-              { i: "🛡️", t: "Premium SS Material", d: "Corrosion-resistant stainless steel with BIS marking — built to last." },
+              { i: "🛡️", t: "Premium SS Material", d: "Corrosion-resistant stainless steel with ISI marking — built to last in every environment." },
               { i: "🔄", t: "50,000+ Cycle Tested", d: "Every product survives 50,000 open/close cycles before leaving our facility." },
-              { i: "🧂", t: "48+ Hours Salt Spray Tested", d: "Tested against corrosion in harsh salt-spray conditions — guaranteed long-term durability." },
+              { i: "🧂", t: "48+ Hrs Salt Spray Tested", d: "Tested against corrosion in harsh salt-spray conditions for guaranteed long-term protection." },
             ].map((c, i) => (
               <Reveal key={c.t} delay={i * 60}>
                 <div className="bg-surface border border-border p-8 hover:border-border-hover transition-colors h-full">
@@ -192,16 +192,25 @@ function Home() {
             <span className="label-accent">Talk to Us</span>
             <h2 className="font-display text-5xl mt-3">FASTEST WAY TO REACH US</h2>
             <div className="mt-8 space-y-3 text-foreground/90">
-              <div className="flex gap-3"><span className="text-primary">📞</span> +91 79959 55787</div>
-              <div className="flex gap-3"><span className="text-primary">✉️</span> info@gripsta.in</div>
-              <div className="flex gap-3"><span className="text-primary">📍</span> Aghapura, Backside of Mahalaksmi Tiffin Center, Hyderabad 500001</div>
+              <div className="flex gap-3 items-start">
+                <span className="text-primary mt-0.5">📞</span>
+                <a href="tel:+917995955787" className="hover:text-primary transition-colors">+91 79959 55787</a>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="text-primary mt-0.5">✉️</span>
+                <a href="mailto:info@gripsta.in" className="hover:text-primary transition-colors">info@gripsta.in</a>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="text-primary mt-0.5">📍</span>
+                <span>Aghapura, Backside of Mahalaksmi Tiffin Center, Hyderabad 500001</span>
+              </div>
             </div>
           </Reveal>
           <Reveal delay={120}>
             <a href="https://wa.me/917995955787" target="_blank" rel="noreferrer" className="block bg-whatsapp text-white p-10 hover:bg-whatsapp-dark transition-colors">
               <div className="text-4xl">💬</div>
               <h3 className="font-display text-3xl mt-4">CHAT ON WHATSAPP</h3>
-              <p className="text-sm opacity-90 mt-2">Fastest way to reach us — pricing, dealer enquiries, and product info, instantly.</p>
+              <p className="text-sm opacity-90 mt-2">Fastest way to reach us — pricing, enquiries, and product info, instantly.</p>
               <span className="inline-flex items-center gap-2 mt-6 font-semibold uppercase tracking-widest text-sm">Open WhatsApp →</span>
             </a>
           </Reveal>
