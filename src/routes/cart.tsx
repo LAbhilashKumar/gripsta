@@ -9,14 +9,13 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { items, remove, updateQty, total } = useCart();
+  const { items, remove, update, total } = useCart();
 
   const handleGetQuote = () => {
     if (items.length === 0) return;
-
     const lines = items.map(
-      item =>
-        `• ${item.product.name} (x${item.qty}) — ₹${(item.product.price * item.qty).toLocaleString("en-IN")}`
+      (item) =>
+        `• ${item.name} (x${item.qty}) — ₹${(item.price * item.qty).toLocaleString("en-IN")}`
     );
     const totalLine = `\nTotal: ₹${total.toLocaleString("en-IN")}`;
     const message = encodeURIComponent(
@@ -30,8 +29,12 @@ function CartPage() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="text-6xl">🛒</div>
         <h1 className="font-display text-4xl">YOUR CART IS EMPTY</h1>
-        <p className="text-muted-foreground">Browse our range and add products you're interested in.</p>
-        <Link to="/products" className="btn-primary mt-2">Browse Products →</Link>
+        <p className="text-muted-foreground">
+          Browse our range and add products you're interested in.
+        </p>
+        <Link to="/products" className="btn-primary mt-2">
+          Browse Products →
+        </Link>
       </div>
     );
   }
@@ -50,17 +53,18 @@ function CartPage() {
 
           {/* ITEMS */}
           <div className="space-y-4">
-            {items.map(({ product, qty }) => (
+            {items.map(({ id, name, price, unit, finish, qty }) => (
               <div
-                key={product.id}
+                key={id + (finish ?? "")}
                 className="bg-surface border border-border p-5 flex gap-5 items-start"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="label-accent">{product.categoryLabel}</p>
-                  <h3 className="font-display text-xl mt-0.5 leading-tight">{product.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{product.shortSpec}</p>
+                  <h3 className="font-display text-xl leading-tight">{name}</h3>
+                  {finish && (
+                    <p className="text-xs text-muted-foreground mt-1">Finish: {finish}</p>
+                  )}
                   <p className="text-primary font-semibold mt-2">
-                    ₹{product.price.toLocaleString("en-IN")} / {product.unit}
+                    ₹{price.toLocaleString("en-IN")} / {unit}
                   </p>
                 </div>
 
@@ -68,39 +72,49 @@ function CartPage() {
                   {/* Qty controls */}
                   <div className="flex items-center border border-border">
                     <button
-                      onClick={() => updateQty(product.id, qty - 1)}
+                      onClick={() => update(id, finish, qty - 1)}
                       className="w-8 h-8 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg"
-                    >−</button>
+                    >
+                      −
+                    </button>
                     <span className="w-10 text-center text-sm font-medium">{qty}</span>
                     <button
-                      onClick={() => updateQty(product.id, qty + 1)}
+                      onClick={() => update(id, finish, qty + 1)}
                       className="w-8 h-8 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg"
-                    >+</button>
+                    >
+                      +
+                    </button>
                   </div>
 
                   <p className="font-display text-lg">
-                    ₹{(product.price * qty).toLocaleString("en-IN")}
+                    ₹{(price * qty).toLocaleString("en-IN")}
                   </p>
 
                   <button
-                    onClick={() => remove(product.id)}
+                    onClick={() => remove(id, finish)}
                     className="text-xs text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest"
-                  >Remove</button>
+                  >
+                    Remove
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* GET QUOTE PANEL */}
+          {/* QUOTE PANEL */}
           <div className="lg:sticky lg:top-28 self-start">
             <div className="bg-surface border border-border p-6">
               <h2 className="font-display text-2xl mb-5">GET QUOTE</h2>
 
               <div className="space-y-2 text-sm border-b border-border pb-5 mb-5">
-                {items.map(({ product, qty }) => (
-                  <div key={product.id} className="flex justify-between gap-2">
-                    <span className="text-muted-foreground truncate">{product.name} ×{qty}</span>
-                    <span className="shrink-0">₹{(product.price * qty).toLocaleString("en-IN")}</span>
+                {items.map(({ id, name, finish, price, qty }) => (
+                  <div key={id + (finish ?? "")} className="flex justify-between gap-2">
+                    <span className="text-muted-foreground truncate">
+                      {name} ×{qty}
+                    </span>
+                    <span className="shrink-0">
+                      ₹{(price * qty).toLocaleString("en-IN")}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -111,7 +125,8 @@ function CartPage() {
               </div>
 
               <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
-                Clicking below will open WhatsApp with your cart items pre-filled. Just hit send and our team will get back to you with pricing and availability.
+                Clicking below will open WhatsApp with your cart items pre-filled. Just hit
+                send and our team will get back to you with pricing and availability.
               </p>
 
               <button
