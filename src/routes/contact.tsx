@@ -29,7 +29,7 @@ function Contact() {
       `Name: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}\n\nMessage:\n${form.message}`
     );
     const subject = encodeURIComponent(`[Gripsta] ${form.subject}`);
-    window.location.href = `mailto:info@gripsta.in?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:Navpadhhardware@gmail.com?subject=${subject}&body=${body}`;
     setSent(true);
   };
 
@@ -55,7 +55,7 @@ function Contact() {
           <div className="bg-surface border border-border p-8">
             <div className="text-3xl">✉️</div>
             <span className="label-accent block mt-4">Email</span>
-            <a href="mailto:info@gripsta.in" className="font-display text-2xl mt-1 block hover:text-primary transition-colors break-all">
+            <a href="mailto:Navpadhhardware@gmail.com" className="font-display text-2xl mt-1 block hover:text-primary transition-colors break-all">
               info@gripsta.in
             </a>
           </div>
