@@ -56,7 +56,7 @@ function Contact() {
             <div className="text-3xl">✉️</div>
             <span className="label-accent block mt-4">Email</span>
             <a href="mailto:Navpadhhardware@gmail.com" className="font-display text-2xl mt-1 block hover:text-primary transition-colors break-all">
-              info@gripsta.in
+              Navpadhhardware@gmail.com
             </a>
           </div>
           <div className="bg-surface border border-border p-8">
