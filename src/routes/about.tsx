@@ -63,8 +63,6 @@ function About() {
               { name: "Wardrobes", desc: "Heavy-duty hinges, premium finishes" },
               { name: "Office Interiors", desc: "Contract-grade hardware" },
               { name: "Living Room Furniture", desc: "Lid stays & gas springs" },
-              { name: "Hotels & Hospitality", desc: "50,000-cycle tested durability" },
-              { name: "POP & Drywall", desc: "Bugle-head screws, multiple finishes" },
             ].map((a, i) => (
               <Reveal key={a.name} delay={i * 50}>
                 <div className="relative aspect-[4/3] border border-border overflow-hidden group" style={{ background: "linear-gradient(135deg,#1a1a1a,#221818)" }}>
