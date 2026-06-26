@@ -46,8 +46,7 @@ function Home() {
     { name: "Wardrobes", desc: "Heavy-duty hinges in multiple finishes", img: "linear-gradient(135deg,#181818,#241a1a)" },
     { name: "Office Interiors", desc: "Contract-grade hardware", img: "linear-gradient(135deg,#1c1c1c,#1c1010)" },
     { name: "Living Room Furniture", desc: "Lid stays & gas springs", img: "linear-gradient(135deg,#1a1a1a,#221818)" },
-    { name: "Hotels & Hospitality", desc: "50,000-cycle tested durability", img: "linear-gradient(135deg,#1c1c1c,#2a1a1a)" },
-    { name: "POP & Drywall", desc: "Bugle-head screws, multiple finishes", img: "linear-gradient(135deg,#181818,#221818)" },
+  
   ];
 
   return (
