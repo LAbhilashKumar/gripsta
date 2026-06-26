@@ -34,7 +34,7 @@ interface Props {
 }
 
 export function ProductCard({ product, hideViewButton, image }: Props) {
-  const { add, items } = useCart();
+  const { add, update, remove, items } = useCart();
   const [pop, setPop] = useState(false);
 
   const existingItem = items.find((i) => i.id === product.id);
@@ -46,6 +46,24 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
     add({ id: product.id, name: product.name, price: product.price, unit: product.unit });
     setPop(true);
     setTimeout(() => setPop(false), 600);
+  };
+
+  const handleIncrease = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    update(product.id, undefined, qty + 1);
+    setPop(true);
+    setTimeout(() => setPop(false), 600);
+  };
+
+  const handleDecrease = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (qty === 1) {
+      remove(product.id, undefined);
+    } else {
+      update(product.id, undefined, qty - 1);
+    }
   };
 
   const gradient = CATEGORY_GRADIENTS[product.category] ?? "linear-gradient(135deg,#1a1a1a,#222)";
@@ -80,7 +98,10 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
                   "repeating-linear-gradient(90deg,transparent,transparent 24px,#fff 24px,#fff 25px)",
               }}
             />
-            <span className="text-4xl relative z-10" style={{ filter: "grayscale(0.3) opacity(0.7)" }}>
+            <span
+              className="text-4xl relative z-10"
+              style={{ filter: "grayscale(0.3) opacity(0.7)" }}
+            >
               {icon}
             </span>
             <span
@@ -110,7 +131,7 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
         )}
       </Link>
 
-      {/* ── Text + Actions ── */}
+      {/* ── Text ── */}
       <div className="p-5 flex-1 flex flex-col">
         <p className="label-accent text-muted-foreground">{product.categoryLabel}</p>
         <h3 className="font-display text-xl mt-1 leading-tight">{product.name}</h3>
@@ -118,26 +139,55 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
           {product.shortSpec}
         </p>
 
+        {/* ── Actions ── */}
         <div className="flex gap-3 mt-5">
-          <button
-            onClick={handleAdd}
-            className="flex-1 btn-primary text-xs py-2.5 relative overflow-hidden"
-          >
-            {/* Pop animation label */}
-            <span
-              key={qty}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{
-                animation: pop ? "cartPop 0.6s ease forwards" : "none",
-                opacity: pop ? 1 : 0,
-              }}
+
+          {qty === 0 ? (
+            /* Not in cart yet — show Add to Cart */
+            <button
+              onClick={handleAdd}
+              className="flex-1 btn-primary text-xs py-2.5 relative overflow-hidden"
             >
-              +1
-            </span>
-            <span style={{ opacity: pop ? 0 : 1, transition: "opacity 0.15s" }}>
-              {qty > 0 ? `Add More (${qty})` : "Add to Cart"}
-            </span>
-          </button>
+              <span
+                className="absolute inset-0 flex items-center justify-center pointer-events-none font-bold"
+                style={{
+                  animation: pop ? "cartPop 0.6s ease forwards" : "none",
+                  opacity: pop ? 1 : 0,
+                }}
+              >
+                +1
+              </span>
+              <span style={{ opacity: pop ? 0 : 1, transition: "opacity 0.15s" }}>
+                Add to Cart
+              </span>
+            </button>
+          ) : (
+            /* Already in cart — show − qty + controls */
+            <div className="flex-1 flex items-center border border-primary overflow-hidden">
+              <button
+                onClick={handleDecrease}
+                className="w-10 h-9 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg text-primary font-bold"
+              >
+                −
+              </button>
+              <span className="flex-1 text-center text-sm font-bold text-primary relative overflow-hidden">
+                <span
+                  key={qty}
+                  style={{ animation: pop ? "cartPop 0.6s ease forwards" : "none" }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0"
+                >
+                  +1
+                </span>
+                {qty}
+              </span>
+              <button
+                onClick={handleIncrease}
+                className="w-10 h-9 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg text-primary font-bold"
+              >
+                +
+              </button>
+            </div>
+          )}
 
           {!hideViewButton && (
             <Link
@@ -148,6 +198,7 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
               View
             </Link>
           )}
+
         </div>
       </div>
 
