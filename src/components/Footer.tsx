@@ -24,9 +24,9 @@ export function Footer() {
         <div>
           <h4 className="label-accent mb-4">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>+91 XXXXX XXXXX</li>
-            <li>info@gripsta.in</li>
-            <li>India</li>
+            <li>+91 79959 55787</li>
+            <li>Navpadhhardware@gmail.com</li>
+            <li>Aghapura, Backside of Mahalaksmi Tiffin Center, Hyderabad 500001</li>
           </ul>
         </div>
         <div>
