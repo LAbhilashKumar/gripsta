@@ -178,7 +178,6 @@ export function Nav() {
               const isActive = l.hash
                 ? pathname === l.to && (hash === `#${l.hash}` || hash === l.hash)
                 : pathname === l.to;
-
               return (
                 <Link
                   key={l.label}
@@ -203,7 +202,6 @@ export function Nav() {
                 </span>
               )}
             </Link>
-            <Link to="/contact" className="hidden sm:inline-flex btn-primary text-xs">Get Quote</Link>
             <button
               className="lg:hidden p-2 text-foreground"
               onClick={() => setOpen(o => !o)}
@@ -221,7 +219,6 @@ export function Nav() {
                 const isActive = l.hash
                   ? pathname === l.to && (hash === `#${l.hash}` || hash === l.hash)
                   : pathname === l.to;
-
                 return (
                   <Link
                     key={l.label}
@@ -235,7 +232,6 @@ export function Nav() {
                   </Link>
                 );
               })}
-              <Link to="/contact" className="btn-primary justify-center mt-4">Get Quote</Link>
             </div>
           </div>
         )}
