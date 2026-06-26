@@ -4,24 +4,23 @@ import { CATEGORIES, PRODUCTS, type Category } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 
-type Search = { cat?: Category | "all"; sort?: "default" | "low" | "high" };
+type Search = { cat?: Category | "all" };
 
 export const Route = createFileRoute("/products")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     cat: (s.cat as Search["cat"]) ?? "all",
-    sort: (s.sort as Search["sort"]) ?? "default",
   }),
   head: () => ({
     meta: [
       { title: "Products — Gripsta Hardware" },
-      { name: "description", content: "Browse Gripsta hinges, drywall screws, drawer channels and lid supports — premium hardware for builders, dealers and designers." },
+      { name: "description", content: "Browse Gripsta hinges, channels, tandem systems, pullouts and more — premium hardware for builders, dealers and designers." },
     ],
   }),
   component: ProductsPage,
 });
 
 function ProductsPage() {
-  const { cat, sort } = Route.useSearch();
+  const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState("");
 
@@ -29,10 +28,8 @@ function ProductsPage() {
     let l = PRODUCTS;
     if (cat && cat !== "all") l = l.filter(p => p.category === cat);
     if (query) l = l.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
-    if (sort === "low") l = [...l].sort((a, b) => a.price - b.price);
-    if (sort === "high") l = [...l].sort((a, b) => b.price - a.price);
     return l;
-  }, [cat, sort, query]);
+  }, [cat, query]);
 
   const filters: { id: Search["cat"]; label: string }[] = [
     { id: "all", label: "All" },
@@ -45,7 +42,7 @@ function ProductsPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <span className="label-accent">Catalog</span>
           <h1 className="font-display text-5xl md:text-7xl mt-3">ALL PRODUCTS</h1>
-          <p className="mt-4 text-muted-foreground max-w-2xl">Explore the full Gripsta hardware range — hinges, drywall screws, drawer channels and lid supports.</p>
+          <p className="mt-4 text-muted-foreground max-w-2xl">Explore the full Gripsta hardware range — hinges, channels, tandem systems, pullouts and more.</p>
         </div>
       </section>
 
@@ -69,16 +66,6 @@ function ProductsPage() {
               type="text" placeholder="Search products..." value={query} onChange={e => setQuery(e.target.value)}
               className="w-full bg-surface border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
             />
-            <h3 className="label-accent mt-8 mb-4">Sort</h3>
-            <select
-              value={sort}
-              onChange={e => navigate({ search: (prev: Search) => ({ ...prev, sort: e.target.value as Search["sort"] }) })}
-              className="w-full bg-surface border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
-            >
-              <option value="default">Default</option>
-              <option value="low">Price: Low → High</option>
-              <option value="high">Price: High → Low</option>
-            </select>
           </aside>
 
           <div>
