@@ -26,7 +26,7 @@ function Contact() {
     );
     const subject = encodeURIComponent(`[Gripsta] ${form.subject}`);
     // Opens mail client — replace with actual email once available
-    window.location.href = `mailto:info@gripsta.in?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:Navpadhhardware@gmail.com?subject=${subject}&body=${body}`;
     setSent(true);
   };
 
