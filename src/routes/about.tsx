@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Reveal } from "@/components/Reveal";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — Gripsta" },
-      { name: "description", content: "Gripsta brings premium-grade architectural hardware to every modern interior — ISI certified, 50,000-cycle tested, seven finishes." },
+      { name: "description", content: "Gripsta brings premium-grade architectural hardware to every modern interior — ISI certified, 50,000-cycle tested, 48+ hours salt spray tested." },
     ],
   }),
   component: About,
@@ -33,10 +33,9 @@ function About() {
           </Reveal>
           <div className="mt-12 grid md:grid-cols-2 gap-5">
             {[
-              { i: "🛡️", t: "Premium SS Material", d: "Corrosion-resistant stainless steel, ISI marked." },
+              { i: "🛡️", t: "Premium SS Material", d: "Corrosion-resistant stainless steel with ISI marking — built for long-term durability in every environment." },
               { i: "🔄", t: "50,000+ Cycle Tested", d: "Every product survives 50,000 open/close cycles before leaving our facility." },
-              { i: "✨", t: "7 Premium Finishes", d: "Matt Silver, Glossy, Antique, Matt Black, Antique Matt, Satin, Rose Gold." },
-              { i: "🤝", t: "Dealer Network Support", d: "Competitive pricing, fast dispatch, marketing material provided." },
+              { i: "🧂", t: "48+ Hours Salt Spray Tested", d: "Tested against corrosion in harsh salt-spray conditions for guaranteed long-term protection." },
             ].map((c, i) => (
               <Reveal key={c.t} delay={i * 60}>
                 <div className="bg-background border border-border p-8 h-full hover:border-border-hover transition-colors">
@@ -59,7 +58,7 @@ function About() {
           <div className="mt-12 grid md:grid-cols-3 gap-5">
             {[
               { name: "Modern Kitchens", desc: "Soft-close drawers, premium hinges" },
-              { name: "Wardrobes", desc: "Heavy-duty hinges in 7 finishes" },
+              { name: "Wardrobes", desc: "Heavy-duty hinges, premium finishes" },
               { name: "Office Interiors", desc: "Contract-grade hardware" },
               { name: "Living Room Furniture", desc: "Lid stays & gas springs" },
               { name: "Hotels & Hospitality", desc: "50,000-cycle tested durability" },
@@ -86,12 +85,11 @@ function About() {
             <span className="label-accent">Built Right</span>
             <h2 className="font-display text-5xl md:text-6xl mt-3">QUALITY PROMISE</h2>
           </Reveal>
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              ["✓","ISI Certified Products"],
-              ["✓","50,000 Cycle Tested"],
-              ["✓","Stainless Steel Grade Material"],
-              ["✓","7 Finish Options"],
+              ["✓", "BSI Certified Products"],
+              ["✓", "50,000 Cycle Tested"],
+              ["✓", "Stainless Steel Grade Material"],
             ].map(([i, t]) => (
               <div key={t} className="bg-background border border-border p-8">
                 <div className="text-3xl text-primary">{i}</div>
@@ -100,9 +98,6 @@ function About() {
             ))}
           </div>
           <p className="mt-8 text-xs text-muted-foreground">T&C: All rates per packet, subject to change.</p>
-          <div className="mt-10">
-            <Link to="/dealer" className="btn-primary">Become a Dealer →</Link>
-          </div>
         </div>
       </section>
     </>
