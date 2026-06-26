@@ -125,7 +125,6 @@ const links = [
   { label: "Categories", to: "/products", hash: "categories" },
   { label: "Why Us", to: "/about", hash: "why" },
   { label: "Applications", to: "/about", hash: "applications" },
-  { label: "Dealers", to: "/dealer" },
   { label: "Contact", to: "/contact" },
 ];
 
