@@ -9,56 +9,59 @@ export interface MergedProduct extends Product {
 }
 
 export function useProducts() {
-  const [data, setData] = useState<any[]>([]);
+  const [products, setProducts] = useState<MergedProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.from("products_override").select("*").then(({ data }) => {
-      if (data) setData(data);
+      const rows = data ?? [];
+
+      const overrideMap: Record<string, any> = {};
+      rows.filter((d) => !d.is_custom).forEach((d) => (overrideMap[d.id] = d));
+
+      const hardcoded: MergedProduct[] = PRODUCTS.map((p) => {
+        const o = overrideMap[p.id];
+        return {
+          ...p,
+          inStock: o === undefined ? true : (o.in_stock ?? true),
+          imageUrl: o?.image_url ?? null,
+          visible: o === undefined ? true : (o.visible ?? true),
+        };
+      });
+
+      const custom: MergedProduct[] = rows
+        .filter((d) => d.is_custom)
+        .map((d) => {
+          const parts = d.id.split("_");
+          const categoryId = (parts[1] as Category) ?? "hinges";
+          const catInfo = CATEGORIES.find((c) => c.id === categoryId);
+          return {
+            id: d.id,
+            name: d.name,
+            category: categoryId,
+            categoryLabel: d.category_label ?? catInfo?.label ?? categoryId,
+            price: 0,
+            unit: "pc",
+            shortSpec: d.short_spec ?? "",
+            description: "",
+            specs: {},
+            applications: [],
+            install: "",
+            inStock: d.in_stock ?? true,
+            imageUrl: d.image_url ?? null,
+            visible: d.visible ?? true,
+          };
+        })
+        .filter((d) => d.visible);
+
+      setProducts([
+        ...hardcoded.filter((p) => p.visible),
+        ...custom,
+      ]);
+
       setLoading(false);
     });
   }, []);
 
-  const overrideMap: Record<string, any> = {};
-  data.filter((d) => !d.is_custom).forEach((d) => (overrideMap[d.id] = d));
-
-  const hardcoded: MergedProduct[] = PRODUCTS.map((p) => {
-    const o = overrideMap[p.id];
-    return {
-      ...p,
-      inStock: o === undefined ? true : (o.in_stock ?? true),
-      imageUrl: o?.image_url ?? null,
-      visible: o === undefined ? true : (o.visible ?? true),
-    };
-  });
-
-  const custom: MergedProduct[] = data
-    .filter((d) => d.is_custom)
-    .map((d) => {
-      const parts = d.id.split("_");
-      const categoryId = (parts[1] as Category) ?? "hinges";
-      const catInfo = CATEGORIES.find((c) => c.id === categoryId);
-      return {
-        id: d.id,
-        name: d.name,
-        category: categoryId,
-        categoryLabel: d.category_label ?? catInfo?.label ?? categoryId,
-        price: 0,
-        unit: "pc",
-        shortSpec: d.short_spec ?? "",
-        description: "",
-        specs: {},
-        applications: [],
-        install: "",
-        inStock: d.in_stock ?? true,
-        imageUrl: d.image_url ?? null,
-        visible: d.visible ?? true,
-      };
-    })
-    .filter((d) => d.visible);
-
-  return {
-    products: [...hardcoded.filter((p) => p.visible), ...custom],
-    loading,
-  };
+  return { products, loading };
 }
