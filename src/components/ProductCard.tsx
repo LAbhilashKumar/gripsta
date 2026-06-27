@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useCart } from "@/lib/cart";
-import type { Product } from "@/lib/products";
+import type { MergedProduct } from "@/lib/useProducts";
 import { useState } from "react";
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
@@ -28,12 +28,11 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 interface Props {
-  product: Product;
+  product: MergedProduct;
   hideViewButton?: boolean;
-  image?: string;
 }
 
-export function ProductCard({ product, hideViewButton, image }: Props) {
+export function ProductCard({ product, hideViewButton }: Props) {
   const { add, update, remove, items } = useCart();
   const [pop, setPop] = useState(false);
 
@@ -43,6 +42,7 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!product.inStock) return;
     add({ id: product.id, name: product.name, price: product.price, unit: product.unit });
     setPop(true);
     setTimeout(() => setPop(false), 600);
@@ -59,11 +59,8 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
   const handleDecrease = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (qty === 1) {
-      remove(product.id, undefined);
-    } else {
-      update(product.id, undefined, qty - 1);
-    }
+    if (qty === 1) remove(product.id, undefined);
+    else update(product.id, undefined, qty - 1);
   };
 
   const gradient = CATEGORY_GRADIENTS[product.category] ?? "linear-gradient(135deg,#1a1a1a,#222)";
@@ -72,16 +69,16 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
   return (
     <div className="bg-surface border border-border hover:border-border-hover transition-colors group flex flex-col">
 
-      {/* ── Image / Placeholder ── */}
+      {/* Image */}
       <Link
         to="/products"
         search={{ cat: product.category }}
         className="block relative overflow-hidden"
         style={{ aspectRatio: "4/3" }}
       >
-        {image ? (
+        {product.imageUrl ? (
           <img
-            src={image}
+            src={product.imageUrl}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -98,10 +95,7 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
                   "repeating-linear-gradient(90deg,transparent,transparent 24px,#fff 24px,#fff 25px)",
               }}
             />
-            <span
-              className="text-4xl relative z-10"
-              style={{ filter: "grayscale(0.3) opacity(0.7)" }}
-            >
+            <span className="text-4xl relative z-10" style={{ filter: "grayscale(0.3) opacity(0.7)" }}>
               {icon}
             </span>
             <span
@@ -117,13 +111,21 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
           </div>
         )}
 
-        {product.badge && (
+        {/* Out of stock overlay */}
+        {!product.inStock && (
+          <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+            <span className="bg-background border border-border px-4 py-1.5 text-xs uppercase tracking-widest text-muted-foreground font-medium">
+              Out of Stock
+            </span>
+          </div>
+        )}
+
+        {product.badge && product.inStock && (
           <span className="absolute top-3 left-3 z-20 label-accent bg-background/90 px-2 py-0.5 text-primary text-[10px]">
             {product.badge}
           </span>
         )}
 
-        {/* Qty badge on image */}
         {qty > 0 && (
           <span className="absolute top-3 right-3 z-20 bg-primary text-primary-foreground font-bold text-xs rounded-full w-6 h-6 flex items-center justify-center">
             {qty}
@@ -131,7 +133,7 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
         )}
       </Link>
 
-      {/* ── Text ── */}
+      {/* Text */}
       <div className="p-5 flex-1 flex flex-col">
         <p className="label-accent text-muted-foreground">{product.categoryLabel}</p>
         <h3 className="font-display text-xl mt-1 leading-tight">{product.name}</h3>
@@ -139,11 +141,13 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
           {product.shortSpec}
         </p>
 
-        {/* ── Actions ── */}
+        {/* Actions */}
         <div className="flex gap-3 mt-5">
-
-          {qty === 0 ? (
-            /* Not in cart yet — show Add to Cart */
+          {!product.inStock ? (
+            <button disabled className="flex-1 btn-primary text-xs py-2.5 opacity-40 cursor-not-allowed">
+              Out of Stock
+            </button>
+          ) : qty === 0 ? (
             <button
               onClick={handleAdd}
               className="flex-1 btn-primary text-xs py-2.5 relative overflow-hidden"
@@ -162,30 +166,16 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
               </span>
             </button>
           ) : (
-            /* Already in cart — show − qty + controls */
             <div className="flex-1 flex items-center border border-primary overflow-hidden">
               <button
                 onClick={handleDecrease}
                 className="w-10 h-9 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg text-primary font-bold"
-              >
-                −
-              </button>
-              <span className="flex-1 text-center text-sm font-bold text-primary relative overflow-hidden">
-                <span
-                  key={qty}
-                  style={{ animation: pop ? "cartPop 0.6s ease forwards" : "none" }}
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0"
-                >
-                  +1
-                </span>
-                {qty}
-              </span>
+              >−</button>
+              <span className="flex-1 text-center text-sm font-bold text-primary">{qty}</span>
               <button
                 onClick={handleIncrease}
                 className="w-10 h-9 flex items-center justify-center hover:bg-primary/10 transition-colors text-lg text-primary font-bold"
-              >
-                +
-              </button>
+              >+</button>
             </div>
           )}
 
@@ -198,7 +188,6 @@ export function ProductCard({ product, hideViewButton, image }: Props) {
               View
             </Link>
           )}
-
         </div>
       </div>
 

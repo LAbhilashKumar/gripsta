@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { CATEGORIES, PRODUCTS } from "@/lib/products";
+import { CATEGORIES } from "@/lib/products";
+import { useProducts } from "@/lib/useProducts";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 
@@ -40,13 +41,14 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
 }
 
 function Home() {
-  const featured = PRODUCTS.slice(0, 8);
+  const { products } = useProducts();
+  const featured = products.slice(0, 8);
+
   const applications = [
     { name: "Modern Kitchens", desc: "Soft-close drawers, premium hinges", img: "linear-gradient(135deg,#1a1a1a,#2a1a1a)" },
     { name: "Wardrobes", desc: "Heavy-duty hinges in multiple finishes", img: "linear-gradient(135deg,#181818,#241a1a)" },
     { name: "Office Interiors", desc: "Contract-grade hardware", img: "linear-gradient(135deg,#1c1c1c,#1c1010)" },
     { name: "Living Room Furniture", desc: "Lid stays & gas springs", img: "linear-gradient(135deg,#1a1a1a,#221818)" },
-  
   ];
 
   return (
@@ -82,13 +84,8 @@ function Home() {
             ))}
           </div>
         </div>
-        {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <div className="w-px h-12 bg-primary" style={{ animation: "scrollBounce 2s ease-in-out infinite" }} />
-          <span className="text-[10px] tracking-[0.3em] text-muted-foreground">SCROLL</span>
-        </div>
-      </section> */}
+
         <div className="absolute bottom-8 right-8 z-0 pointer-events-none">
-          {/* <div className="w-px h-12 bg-primary" style={{ animation: "scrollBounce 2s ease-in-out infinite" }} /> */}
           <span className="text-[10px] tracking-[0.3em] text-muted-foreground">SCROLL</span>
         </div>
       </section>
@@ -131,7 +128,9 @@ function Home() {
           </Reveal>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {featured.map((p, i) => (
-              <Reveal key={p.id} delay={i * 50}><ProductCard product={p} /></Reveal>
+              <Reveal key={p.id} delay={i * 50}>
+                <ProductCard product={p} />
+              </Reveal>
             ))}
           </div>
         </div>
