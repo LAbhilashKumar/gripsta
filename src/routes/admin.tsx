@@ -1018,294 +1018,65 @@
 //   );
 // }
 
-
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { PRODUCTS, CATEGORIES } from "@/lib/products";
+import { supabase } from "./supabase";
+import { PRODUCTS, CATEGORIES, type Product, type Category } from "./products";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Gripsta" }] }),
-  component: AdminPage,
-});
-
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD as string;
-
-interface CustomProduct {
-  id: string;
-  name: string;
-  category: string;
-  category_label: string;
-  image_url: string;
+export interface MergedProduct extends Product {
+  inStock: boolean;
+  imageUrl: string | null;
+  visible: boolean;
 }
 
-function AdminPage() {
-  const [authed, setAuthed] = useState(false);
-  const [pw, setPw] = useState("");
-  const [error, setError] = useState("");
-
-  // Existing product image URLs
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
-
-  // New product form
-  const [newProduct, setNewProduct] = useState<CustomProduct>({
-    id: "", name: "", category: CATEGORIES[0].id, category_label: CATEGORIES[0].label, image_url: "",
-  });
-  const [adding, setAdding] = useState(false);
-  const [addedMsg, setAddedMsg] = useState("");
-
-  // Custom products list
-  const [customProducts, setCustomProducts] = useState<any[]>([]);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+export function useProducts() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authed) return;
-    loadData();
-  }, [authed]);
-
-  const loadData = async () => {
-    const { data } = await supabase.from("products_override").select("*");
-    if (data) {
-      const urls: Record<string, string> = {};
-      data.forEach((d) => { if (!d.is_custom) urls[d.id] = d.image_url ?? ""; });
-      setImageUrls(urls);
-      setCustomProducts(data.filter((d) => d.is_custom));
-    }
-  };
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pw === ADMIN_PASSWORD) { setAuthed(true); setError(""); }
-    else setError("Wrong password.");
-  };
-
-  const handleSaveImage = async (productId: string) => {
-    setSaving(productId);
-    await supabase.from("products_override").upsert({
-      id: productId,
-      name: PRODUCTS.find(p => p.id === productId)?.name ?? productId,
-      category: PRODUCTS.find(p => p.id === productId)?.category ?? "",
-      image_url: imageUrls[productId] ?? null,
-      is_custom: false,
-      visible: true,
-      updated_at: new Date().toISOString(),
+    supabase.from("products_override").select("*").then(({ data }) => {
+      if (data) setData(data);
+      setLoading(false);
     });
-    setSaving(null);
-    setSaved(productId);
-    setTimeout(() => setSaved(null), 2000);
-  };
+  }, []);
 
-  const handleAddProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProduct.name.trim()) return;
-    setAdding(true);
-    const id = `custom-${Date.now()}`;
-    const catInfo = CATEGORIES.find(c => c.id === newProduct.category);
-    await supabase.from("products_override").insert({
-      id,
-      name: newProduct.name.trim(),
-      category: newProduct.category,
-      category_label: catInfo?.label ?? newProduct.category,
-      image_url: newProduct.image_url || null,
-      is_custom: true,
-      visible: true,
-      updated_at: new Date().toISOString(),
+  const overrideMap: Record<string, any> = {};
+  data.filter((d) => !d.is_custom).forEach((d) => (overrideMap[d.id] = d));
+
+  // Hardcoded products with overrides applied
+  const hardcoded: MergedProduct[] = PRODUCTS.map((p) => {
+    const o = overrideMap[p.id];
+    return {
+      ...p,
+      inStock: o === undefined ? true : (o.in_stock ?? true),
+      imageUrl: o?.image_url ?? null,
+      visible: o === undefined ? true : (o.visible ?? true),
+    };
+  });
+
+  // Admin-created products
+  const custom: MergedProduct[] = data
+    .filter((d) => d.is_custom && d.visible)
+    .map((d) => {
+      const catInfo = CATEGORIES.find((c) => c.id === d.category);
+      return {
+        id: d.id,
+        name: d.name,
+        category: d.category as Category,
+        categoryLabel: d.category_label ?? catInfo?.label ?? d.category,
+        price: 0,
+        unit: "pc",
+        shortSpec: "",
+        description: "",
+        specs: {},
+        applications: [],
+        install: "",
+        inStock: true,
+        imageUrl: d.image_url ?? null,
+        visible: true,
+      };
     });
-    setAdding(false);
-    setAddedMsg(`✓ "${newProduct.name}" added to ${catInfo?.label}`);
-    setTimeout(() => setAddedMsg(""), 3000);
-    setNewProduct({ id: "", name: "", category: CATEGORIES[0].id, category_label: CATEGORIES[0].label, image_url: "" });
-    loadData();
-  };
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    await supabase.from("products_override").delete().eq("id", id);
-    setDeletingId(null);
-    loadData();
-  };
+  const all = [...hardcoded.filter((p) => p.visible), ...custom];
 
-  const handleUpdateCustomImage = async (id: string, imageUrl: string) => {
-    await supabase.from("products_override").update({ image_url: imageUrl }).eq("id", id);
-    loadData();
-  };
-
-  if (!authed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          <span className="label-accent">Admin Access</span>
-          <h1 className="font-display text-4xl mt-2 mb-8">GRIPSTA ADMIN</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={pw}
-              onChange={(e) => setPw(e.target.value)}
-              className="w-full bg-surface border border-border px-4 py-3 focus:outline-none focus:border-primary"
-            />
-            {error && <p className="text-xs text-red-500">{error}</p>}
-            <button className="btn-primary w-full justify-center">Enter →</button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <section className="pt-32 pb-12">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <span className="label-accent">Admin Panel</span>
-          <h1 className="font-display text-5xl mt-2">MANAGE PRODUCTS</h1>
-        </div>
-      </section>
-
-      <section className="pb-24">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10 space-y-12">
-
-          {/* ── ADD NEW PRODUCT ── */}
-          <div>
-            <span className="label-accent">Add New Product</span>
-            <h2 className="font-display text-3xl mt-1 mb-6">NEW PRODUCT</h2>
-            <form onSubmit={handleAddProduct} className="bg-surface border border-border p-6 space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                {/* Name */}
-                <div>
-                  <label className="label-accent block mb-2">Product Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. SS Butt Hinge 75mm"
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct(p => ({ ...p, name: e.target.value }))}
-                    className="w-full bg-background border border-border px-4 py-3 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="label-accent block mb-2">Category *</label>
-                  <select
-                    value={newProduct.category}
-                    onChange={(e) => {
-                      const cat = CATEGORIES.find(c => c.id === e.target.value);
-                      setNewProduct(p => ({ ...p, category: e.target.value, category_label: cat?.label ?? e.target.value }));
-                    }}
-                    className="w-full bg-background border border-border px-4 py-3 text-sm focus:outline-none focus:border-primary"
-                  >
-                    {CATEGORIES.map(c => (
-                      <option key={c.id} value={c.id}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="label-accent block mb-2">Image URL <span className="text-muted-foreground normal-case tracking-normal">(optional — paste later)</span></label>
-                <input
-                  type="text"
-                  placeholder="https://... leave empty for now"
-                  value={newProduct.image_url}
-                  onChange={(e) => setNewProduct(p => ({ ...p, image_url: e.target.value }))}
-                  className="w-full bg-background border border-border px-4 py-3 text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <button
-                  type="submit"
-                  disabled={adding}
-                  className="btn-primary px-8"
-                >
-                  {adding ? "Adding..." : "Add Product →"}
-                </button>
-                {addedMsg && (
-                  <span className="text-sm text-green-500 font-medium">{addedMsg}</span>
-                )}
-              </div>
-            </form>
-          </div>
-
-          {/* ── CUSTOM PRODUCTS LIST ── */}
-          {customProducts.length > 0 && (
-            <div>
-              <span className="label-accent">Admin Added Products</span>
-              <h2 className="font-display text-3xl mt-1 mb-6">CUSTOM PRODUCTS</h2>
-              <div className="space-y-3">
-                {customProducts.map((p) => (
-                  <div key={p.id} className="bg-surface border border-border p-5 flex gap-4 items-center flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <span className="label-accent">{p.category_label}</span>
-                      <h3 className="font-display text-lg mt-0.5">{p.name}</h3>
-                    </div>
-
-                    {/* Image URL for custom product */}
-                    <input
-                      type="text"
-                      placeholder="Paste image URL here"
-                      defaultValue={p.image_url ?? ""}
-                      onBlur={(e) => handleUpdateCustomImage(p.id, e.target.value)}
-                      className="flex-1 min-w-[200px] bg-background border border-border px-3 py-2 text-xs focus:outline-none focus:border-primary"
-                    />
-
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      disabled={deletingId === p.id}
-                      className="text-xs text-muted-foreground hover:text-red-500 uppercase tracking-widest transition-colors shrink-0"
-                    >
-                      {deletingId === p.id ? "Deleting..." : "Delete"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── EXISTING PRODUCTS — IMAGE URLS ── */}
-          <div>
-            <span className="label-accent">Existing Products</span>
-            <h2 className="font-display text-3xl mt-1 mb-2">ADD IMAGES</h2>
-            <p className="text-muted-foreground text-sm mb-6">Paste image URLs here when photos are ready — they'll show live instantly.</p>
-            <div className="space-y-3">
-              {PRODUCTS.map((p) => (
-                <div key={p.id} className="bg-surface border border-border p-5 flex gap-4 items-center flex-wrap">
-                  <div className="flex-1 min-w-0">
-                    <span className="label-accent">{p.categoryLabel}</span>
-                    <h3 className="font-display text-lg mt-0.5">{p.name}</h3>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Paste image URL here"
-                    value={imageUrls[p.id] ?? ""}
-                    onChange={(e) => setImageUrls(prev => ({ ...prev, [p.id]: e.target.value }))}
-                    className="flex-1 min-w-[200px] bg-background border border-border px-3 py-2 text-xs focus:outline-none focus:border-primary"
-                  />
-                  <button
-                    onClick={() => handleSaveImage(p.id)}
-                    disabled={saving === p.id}
-                    className={`shrink-0 text-xs px-5 py-2 border transition-colors uppercase tracking-widest ${
-                      saved === p.id
-                        ? "border-green-500 text-green-500"
-                        : "border-border text-foreground hover:border-primary hover:text-primary"
-                    }`}
-                  >
-                    {saving === p.id ? "Saving..." : saved === p.id ? "✓ Saved" : "Save"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
-    </>
-  );
+  return { products: all, loading };
 }
-
-
-
-
