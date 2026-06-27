@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase, type ProductOverride } from "./supabase";
 import { PRODUCTS, type Product } from "./products";
@@ -15,7 +14,7 @@ export function useProducts() {
 
   useEffect(() => {
     async function fetch() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("products_override")
         .select("*");
       if (data) setOverrides(data);
@@ -31,9 +30,9 @@ export function useProducts() {
       name: o?.name ?? p.name,
       shortSpec: o?.short_spec ?? p.shortSpec,
       description: o?.description ?? p.description,
-      inStock: o?.in_stock ?? true,
+      inStock: o === undefined ? true : (o.in_stock ?? true),
       imageUrl: o?.image_url ?? null,
-      visible: o?.visible ?? true,
+      visible: o === undefined ? true : (o.visible ?? true),
     };
   });
 
