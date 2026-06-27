@@ -14,9 +14,15 @@ export function useProducts() {
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+
+    console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+
+    const { data, error } = await supabase
       .from("products_override")
       .select("*");
+
+    console.log("Supabase data:", data);
+    console.log("Supabase error:", error);
 
     const rows = data ?? [];
 
@@ -67,8 +73,6 @@ export function useProducts() {
 
   useEffect(() => {
     fetchProducts();
-
-    // Re-fetch every 30 seconds to pick up admin changes
     const interval = setInterval(fetchProducts, 30000);
     return () => clearInterval(interval);
   }, [fetchProducts]);
