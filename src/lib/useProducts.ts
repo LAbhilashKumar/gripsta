@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase, type ProductOverride } from "./supabase";
-import { PRODUCTS, type Product } from "./products";
+import { supabase } from "./supabase";
+import { PRODUCTS, CATEGORIES, type Product, type Category } from "./products";
 
 export interface MergedProduct extends Product {
   inStock: boolean;
@@ -9,32 +9,56 @@ export interface MergedProduct extends Product {
 }
 
 export function useProducts() {
-  const [overrides, setOverrides] = useState<ProductOverride[]>([]);
+  const [customProducts, setCustomProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("products_override")
         .select("*");
-      if (data) setOverrides(data);
+      if (data) setCustomProducts(data);
       setLoading(false);
     }
     fetch();
   }, []);
 
-  const merged: MergedProduct[] = PRODUCTS.map((p) => {
-    const o = overrides.find((x) => x.id === p.id);
+  // Hardcoded products — always in stock, use imageUrl from Supabase if available
+  const hardcoded: MergedProduct[] = PRODUCTS.map((p) => {
+    const o = customProducts.find((x) => x.id === p.id && !x.is_custom);
     return {
       ...p,
-      name: o?.name ?? p.name,
-      shortSpec: o?.short_spec ?? p.shortSpec,
-      description: o?.description ?? p.description,
-      inStock: o === undefined ? true : (o.in_stock ?? true),
+      inStock: true,
       imageUrl: o?.image_url ?? null,
-      visible: o === undefined ? true : (o.visible ?? true),
+      visible: true,
     };
   });
 
-  return { products: merged.filter((p) => p.visible), loading };
+  // Admin-created products from Supabase
+  const custom: MergedProduct[] = customProducts
+    .filter((p) => p.is_custom && p.visible)
+    .map((p) => {
+      const catInfo = CATEGORIES.find((c) => c.id === p.category);
+      return {
+        id: p.id,
+        name: p.name,
+        category: p.category as Category,
+        categoryLabel: p.category_label ?? catInfo?.label ?? p.category,
+        price: 0,
+        unit: "pc",
+        shortSpec: "",
+        description: "",
+        specs: {},
+        applications: [],
+        install: "",
+        inStock: true,
+        imageUrl: p.image_url ?? null,
+        visible: p.visible ?? true,
+      };
+    });
+
+  return {
+    products: [...hardcoded, ...custom],
+    loading,
+  };
 }
