@@ -201,7 +201,7 @@ function Home() {
               </div>
               <div className="flex gap-3 items-start">
                 <span className="text-primary mt-0.5">✉️</span>
-                <a href="mailto:info@gripsta.in" className="hover:text-primary transition-colors">info@gripsta.in</a>
+                <a href="Navpadhhardware@gmail.com" className="hover:text-primary transition-colors">info@gripsta.in</a>
               </div>
               <div className="flex gap-3 items-start">
                 <span className="text-primary mt-0.5">📍</span>
