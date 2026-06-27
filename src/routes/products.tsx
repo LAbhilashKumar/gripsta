@@ -106,326 +106,71 @@
 
 
 
-// import { createFileRoute, Link } from "@tanstack/react-router";
-// import { useEffect, useState } from "react";
-// import { supabase, type ProductOverride } from "@/lib/supabase";
-// import { PRODUCTS, CATEGORIES, type Category, type Product } from "@/lib/products";
-
-// export const Route = createFileRoute("/products")({
-//   head: () => ({ meta: [{ title: "Products — Gripsta" }] }),
-//   component: ProductsPage,
-// });
-
-// // A display product — either from PRODUCTS merged with overrides, or a custom one
-// interface DisplayProduct {
-//   id: string;
-//   name: string;
-//   short_spec: string;
-//   description: string;
-//   image_url: string | null;
-//   in_stock: boolean;
-//   visible: boolean;
-//   category: Category;
-//   categoryLabel: string;
-//   badge?: string;
-//   price?: number;
-//   unit?: string;
-// }
-
-// function buildDisplayProducts(overrides: Record<string, ProductOverride>): DisplayProduct[] {
-//   const knownIds = new Set(PRODUCTS.map((p) => p.id));
-
-//   // Static products merged with overrides
-//   const staticMerged: DisplayProduct[] = PRODUCTS.map((p) => {
-//     const o = overrides[p.id];
-//     return {
-//       id: p.id,
-//       name: o?.name ?? p.name,
-//       short_spec: o?.short_spec ?? p.shortSpec,
-//       description: o?.description ?? p.description,
-//       image_url: o?.image_url ?? null,
-//       in_stock: o?.in_stock ?? true,
-//       visible: o?.visible ?? true,
-//       category: p.category,
-//       categoryLabel: p.categoryLabel,
-//       badge: p.badge,
-//       price: p.price,
-//       unit: p.unit,
-//     };
-//   });
-
-//   // Custom products (added via admin, id starts with "custom_")
-//   const customProducts: DisplayProduct[] = Object.values(overrides)
-//     .filter((o) => !knownIds.has(o.id))
-//     .map((o) => {
-//       const parts = o.id.split("_");
-//       const categoryId = (parts[1] as Category) ?? "hinges";
-//       const cat = CATEGORIES.find((c) => c.id === categoryId);
-//       return {
-//         id: o.id,
-//         name: o.name ?? "",
-//         short_spec: o.short_spec ?? "",
-//         description: o.description ?? "",
-//         image_url: o.image_url ?? null,
-//         in_stock: o.in_stock ?? true,
-//         visible: o.visible ?? true,
-//         category: categoryId,
-//         categoryLabel: cat?.label ?? "Custom",
-//       };
-//     });
-
-//   return [...staticMerged, ...customProducts];
-// }
-
-// function ProductsPage() {
-//   const [allProducts, setAllProducts] = useState<DisplayProduct[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [activeCategory, setActiveCategory] = useState<Category | "all">("all");
-
-//   useEffect(() => {
-//     supabase.from("products_override").select("*").then(({ data }) => {
-//       const map: Record<string, ProductOverride> = {};
-//       (data ?? []).forEach((d) => (map[d.id] = d));
-//       setAllProducts(buildDisplayProducts(map));
-//       setLoading(false);
-//     });
-//   }, []);
-
-//   // Only show visible products
-//   const visibleProducts = allProducts.filter((p) => p.visible);
-
-//   // Categories that have at least one visible product
-//   const activeCategories = CATEGORIES.filter((cat) =>
-//     visibleProducts.some((p) => p.category === cat.id)
-//   );
-
-//   const filteredProducts =
-//     activeCategory === "all"
-//       ? visibleProducts
-//       : visibleProducts.filter((p) => p.category === activeCategory);
-
-//   // Group by category for "all" view
-//   const groupedByCategory = activeCategories.map((cat) => ({
-//     ...cat,
-//     products: filteredProducts.filter((p) => p.category === cat.id),
-//   })).filter((g) => g.products.length > 0);
-
-//   return (
-//     <>
-//       {/* Hero */}
-//       <section className="pt-32 pb-12">
-//         <div className="max-w-6xl mx-auto px-6 lg:px-10">
-//           <span className="label-accent">Our Range</span>
-//           <h1 className="font-display text-5xl lg:text-6xl mt-2">PRODUCTS</h1>
-//           <p className="text-muted-foreground mt-3 max-w-xl">
-//             Premium stainless steel hardware for kitchens, wardrobes, and interiors.
-//             Engineered for smooth operation and lasting finish.
-//           </p>
-//         </div>
-//       </section>
-
-//       {/* Category filter pills */}
-//       <section className="pb-8 sticky top-16 z-10 bg-background border-b border-border">
-//         <div className="max-w-6xl mx-auto px-6 lg:px-10">
-//           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-//             <button
-//               onClick={() => setActiveCategory("all")}
-//               className={`shrink-0 text-xs px-4 py-2 border transition-colors ${
-//                 activeCategory === "all"
-//                   ? "border-primary bg-primary text-primary-foreground"
-//                   : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-//               }`}
-//             >
-//               All
-//             </button>
-//             {activeCategories.map((cat) => (
-//               <button
-//                 key={cat.id}
-//                 onClick={() => setActiveCategory(cat.id)}
-//                 className={`shrink-0 text-xs px-4 py-2 border transition-colors whitespace-nowrap ${
-//                   activeCategory === cat.id
-//                     ? "border-primary bg-primary text-primary-foreground"
-//                     : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-//                 }`}
-//               >
-//                 {cat.icon} {cat.label}
-//               </button>
-//             ))}
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* Products */}
-//       <section className="py-12 pb-24">
-//         <div className="max-w-6xl mx-auto px-6 lg:px-10">
-//           {loading ? (
-//             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-//               {Array.from({ length: 8 }).map((_, i) => (
-//                 <div key={i} className="bg-surface border border-border animate-pulse h-64" />
-//               ))}
-//             </div>
-//           ) : groupedByCategory.length === 0 ? (
-//             <div className="text-center py-20 text-muted-foreground text-sm">No products found.</div>
-//           ) : activeCategory !== "all" ? (
-//             // Single category grid
-//             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-//               {filteredProducts.map((p) => (
-//                 <ProductCard key={p.id} product={p} />
-//               ))}
-//             </div>
-//           ) : (
-//             // Grouped by category
-//             <div className="space-y-14">
-//               {groupedByCategory.map((group) => (
-//                 <div key={group.id}>
-//                   {/* Category heading */}
-//                   <div className="flex items-end justify-between mb-5 pb-3 border-b border-border">
-//                     <div className="flex items-center gap-3">
-//                       <span className="text-2xl">{group.icon}</span>
-//                       <div>
-//                         <h2 className="font-display text-2xl">{group.label}</h2>
-//                         <p className="text-xs text-muted-foreground">{group.desc}</p>
-//                       </div>
-//                     </div>
-//                     <button
-//                       onClick={() => setActiveCategory(group.id)}
-//                       className="text-xs text-primary hover:underline underline-offset-2 shrink-0"
-//                     >
-//                       View all →
-//                     </button>
-//                   </div>
-//                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-//                     {group.products.map((p) => (
-//                       <ProductCard key={p.id} product={p} />
-//                     ))}
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       </section>
-//     </>
-//   );
-// }
-
-// function ProductCard({ product: p }: { product: DisplayProduct }) {
-//   return (
-//     <Link
-//       to="/products/$id"
-//       params={{ id: p.id }}
-//       className="group bg-surface border border-border flex flex-col hover:border-primary transition-colors"
-//     >
-//       {/* Image */}
-//       <div className="aspect-square bg-background flex items-center justify-center overflow-hidden relative">
-//         {p.image_url ? (
-//           <img
-//             src={p.image_url}
-//             alt={p.name}
-//             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-//           />
-//         ) : (
-//           <span className="text-4xl opacity-20">
-//             {CATEGORIES.find((c) => c.id === p.category)?.icon ?? "📦"}
-//           </span>
-//         )}
-//         {p.badge && (
-//           <span className="absolute top-2 left-2 label-accent text-[9px] px-2 py-0.5 bg-primary text-primary-foreground">
-//             {p.badge}
-//           </span>
-//         )}
-//         {!p.in_stock && (
-//           <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-//             <span className="text-xs text-muted-foreground border border-border px-3 py-1">Out of Stock</span>
-//           </div>
-//         )}
-//       </div>
-
-//       {/* Info */}
-//       <div className="p-4 flex flex-col gap-1 flex-1">
-//         <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{p.categoryLabel}</p>
-//         <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-//           {p.name}
-//         </h3>
-//         {p.short_spec && (
-//           <p className="text-[11px] text-muted-foreground mt-1 line-clamp-1">{p.short_spec}</p>
-//         )}
-//         {p.price && (
-//           <p className="text-sm font-display mt-auto pt-2">
-//             ₹{p.price.toLocaleString("en-IN")}{" "}
-//             <span className="text-xs text-muted-foreground font-normal">/ {p.unit}</span>
-//           </p>
-//         )}
-//       </div>
-//     </Link>
-//   );
-// }
-
-
-
-
-
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase, type ProductOverride, type DBCategory } from "@/lib/supabase";
-import { PRODUCTS, CATEGORIES as FALLBACK_CATEGORIES } from "@/lib/products";
+import { supabase, type ProductOverride } from "@/lib/supabase";
+import { PRODUCTS, CATEGORIES, type Category, type Product } from "@/lib/products";
 
 export const Route = createFileRoute("/products")({
   head: () => ({ meta: [{ title: "Products — Gripsta" }] }),
   component: ProductsPage,
 });
 
+// A display product — either from PRODUCTS merged with overrides, or a custom one
 interface DisplayProduct {
   id: string;
   name: string;
   short_spec: string;
+  description: string;
   image_url: string | null;
   in_stock: boolean;
   visible: boolean;
-  category: string;
+  category: Category;
   categoryLabel: string;
   badge?: string;
   price?: number;
   unit?: string;
 }
 
-function buildDisplayProducts(
-  overrides: Record<string, ProductOverride>,
-  categories: DBCategory[]
-): DisplayProduct[] {
-  const catMap = Object.fromEntries(categories.map((c) => [c.id, c]));
+function buildDisplayProducts(overrides: Record<string, ProductOverride>): DisplayProduct[] {
   const knownIds = new Set(PRODUCTS.map((p) => p.id));
 
+  // Static products merged with overrides
   const staticMerged: DisplayProduct[] = PRODUCTS.map((p) => {
     const o = overrides[p.id];
     return {
       id: p.id,
       name: o?.name ?? p.name,
       short_spec: o?.short_spec ?? p.shortSpec,
+      description: o?.description ?? p.description,
       image_url: o?.image_url ?? null,
       in_stock: o?.in_stock ?? true,
       visible: o?.visible ?? true,
       category: p.category,
-      categoryLabel: catMap[p.category]?.label ?? p.categoryLabel,
+      categoryLabel: p.categoryLabel,
       badge: p.badge,
       price: p.price,
       unit: p.unit,
     };
   });
 
+  // Custom products (added via admin, id starts with "custom_")
   const customProducts: DisplayProduct[] = Object.values(overrides)
     .filter((o) => !knownIds.has(o.id))
     .map((o) => {
-      const categoryId = o.id.split("_")[1] ?? "hinges";
+      const parts = o.id.split("_");
+      const categoryId = (parts[1] as Category) ?? "hinges";
+      const cat = CATEGORIES.find((c) => c.id === categoryId);
       return {
         id: o.id,
         name: o.name ?? "",
         short_spec: o.short_spec ?? "",
+        description: o.description ?? "",
         image_url: o.image_url ?? null,
         in_stock: o.in_stock ?? true,
         visible: o.visible ?? true,
         category: categoryId,
-        categoryLabel: catMap[categoryId]?.label ?? categoryId,
+        categoryLabel: cat?.label ?? "Custom",
       };
     });
 
@@ -434,38 +179,23 @@ function buildDisplayProducts(
 
 function ProductsPage() {
   const [allProducts, setAllProducts] = useState<DisplayProduct[]>([]);
-  const [categories, setCategories] = useState<DBCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<Category | "all">("all");
 
   useEffect(() => {
-    Promise.all([
-      supabase.from("categories").select("*").order("sort_order"),
-      supabase.from("products_override").select("*"),
-    ]).then(([catRes, prodRes]) => {
-      // Fall back to hardcoded if DB empty (first-run before migration)
-      const cats: DBCategory[] =
-        catRes.data && catRes.data.length > 0
-          ? catRes.data
-          : FALLBACK_CATEGORIES.map((c, i) => ({
-              id: c.id, label: c.label, description: c.desc,
-              icon: c.icon, sort_order: i + 1, visible: true,
-              created_at: "", updated_at: "",
-            }));
-
+    supabase.from("products_override").select("*").then(({ data }) => {
       const map: Record<string, ProductOverride> = {};
-      (prodRes.data ?? []).forEach((d) => (map[d.id] = d));
-
-      setCategories(cats.filter((c) => c.visible));
-      setAllProducts(buildDisplayProducts(map, cats));
+      (data ?? []).forEach((d) => (map[d.id] = d));
+      setAllProducts(buildDisplayProducts(map));
       setLoading(false);
     });
   }, []);
 
+  // Only show visible products
   const visibleProducts = allProducts.filter((p) => p.visible);
 
-  // Only show categories that have at least one visible product
-  const activeCategories = categories.filter((cat) =>
+  // Categories that have at least one visible product
+  const activeCategories = CATEGORIES.filter((cat) =>
     visibleProducts.some((p) => p.category === cat.id)
   );
 
@@ -474,9 +204,11 @@ function ProductsPage() {
       ? visibleProducts
       : visibleProducts.filter((p) => p.category === activeCategory);
 
-  const groupedByCategory = activeCategories
-    .map((cat) => ({ ...cat, products: visibleProducts.filter((p) => p.category === cat.id) }))
-    .filter((g) => g.products.length > 0);
+  // Group by category for "all" view
+  const groupedByCategory = activeCategories.map((cat) => ({
+    ...cat,
+    products: filteredProducts.filter((p) => p.category === cat.id),
+  })).filter((g) => g.products.length > 0);
 
   return (
     <>
@@ -487,14 +219,15 @@ function ProductsPage() {
           <h1 className="font-display text-5xl lg:text-6xl mt-2">PRODUCTS</h1>
           <p className="text-muted-foreground mt-3 max-w-xl">
             Premium stainless steel hardware for kitchens, wardrobes, and interiors.
+            Engineered for smooth operation and lasting finish.
           </p>
         </div>
       </section>
 
-      {/* Category filter pills — sticky */}
-      <section className="pb-0 sticky top-16 z-10 bg-background border-b border-border">
+      {/* Category filter pills */}
+      <section className="pb-8 sticky top-16 z-10 bg-background border-b border-border">
         <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => setActiveCategory("all")}
               className={`shrink-0 text-xs px-4 py-2 border transition-colors ${
@@ -502,21 +235,27 @@ function ProductsPage() {
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground hover:border-primary hover:text-primary"
               }`}
-            >All</button>
+            >
+              All
+            </button>
             {activeCategories.map((cat) => (
-              <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
                 className={`shrink-0 text-xs px-4 py-2 border transition-colors whitespace-nowrap ${
                   activeCategory === cat.id
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border text-muted-foreground hover:border-primary hover:text-primary"
                 }`}
-              >{cat.icon} {cat.label}</button>
+              >
+                {cat.icon} {cat.label}
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Products grid */}
+      {/* Products */}
       <section className="py-12 pb-24">
         <div className="max-w-6xl mx-auto px-6 lg:px-10">
           {loading ? (
@@ -525,31 +264,40 @@ function ProductsPage() {
                 <div key={i} className="bg-surface border border-border animate-pulse h-64" />
               ))}
             </div>
+          ) : groupedByCategory.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground text-sm">No products found.</div>
           ) : activeCategory !== "all" ? (
+            // Single category grid
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((p) => <ProductCard key={p.id} product={p} categories={categories} />)}
+              {filteredProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
             </div>
           ) : (
+            // Grouped by category
             <div className="space-y-14">
               {groupedByCategory.map((group) => (
                 <div key={group.id}>
+                  {/* Category heading */}
                   <div className="flex items-end justify-between mb-5 pb-3 border-b border-border">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{group.icon}</span>
                       <div>
                         <h2 className="font-display text-2xl">{group.label}</h2>
-                        {group.description && (
-                          <p className="text-xs text-muted-foreground">{group.description}</p>
-                        )}
+                        <p className="text-xs text-muted-foreground">{group.desc}</p>
                       </div>
                     </div>
-                    <button onClick={() => setActiveCategory(group.id)}
-                      className="text-xs text-primary hover:underline underline-offset-2 shrink-0">
+                    <button
+                      onClick={() => setActiveCategory(group.id)}
+                      className="text-xs text-primary hover:underline underline-offset-2 shrink-0"
+                    >
                       View all →
                     </button>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {group.products.map((p) => <ProductCard key={p.id} product={p} categories={categories} />)}
+                    {group.products.map((p) => (
+                      <ProductCard key={p.id} product={p} />
+                    ))}
                   </div>
                 </div>
               ))}
@@ -561,17 +309,25 @@ function ProductsPage() {
   );
 }
 
-function ProductCard({ product: p, categories }: { product: DisplayProduct; categories: DBCategory[] }) {
-  const catIcon = categories.find((c) => c.id === p.category)?.icon ?? "📦";
+function ProductCard({ product: p }: { product: DisplayProduct }) {
   return (
-    <Link to="/products/$id" params={{ id: p.id }}
-      className="group bg-surface border border-border flex flex-col hover:border-primary transition-colors">
+    <Link
+      to="/products/$id"
+      params={{ id: p.id }}
+      className="group bg-surface border border-border flex flex-col hover:border-primary transition-colors"
+    >
+      {/* Image */}
       <div className="aspect-square bg-background flex items-center justify-center overflow-hidden relative">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img
+            src={p.image_url}
+            alt={p.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         ) : (
-          <span className="text-4xl opacity-20">{catIcon}</span>
+          <span className="text-4xl opacity-20">
+            {CATEGORIES.find((c) => c.id === p.category)?.icon ?? "📦"}
+          </span>
         )}
         {p.badge && (
           <span className="absolute top-2 left-2 label-accent text-[9px] px-2 py-0.5 bg-primary text-primary-foreground">
@@ -584,17 +340,26 @@ function ProductCard({ product: p, categories }: { product: DisplayProduct; cate
           </div>
         )}
       </div>
+
+      {/* Info */}
       <div className="p-4 flex flex-col gap-1 flex-1">
         <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{p.categoryLabel}</p>
-        <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">{p.name}</h3>
-        {p.short_spec && <p className="text-[11px] text-muted-foreground mt-1 line-clamp-1">{p.short_spec}</p>}
+        <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+          {p.name}
+        </h3>
+        {p.short_spec && (
+          <p className="text-[11px] text-muted-foreground mt-1 line-clamp-1">{p.short_spec}</p>
+        )}
         {p.price && (
           <p className="text-sm font-display mt-auto pt-2">
-            ₹{p.price.toLocaleString("en-IN")}
-            <span className="text-xs text-muted-foreground font-normal"> / {p.unit}</span>
+            ₹{p.price.toLocaleString("en-IN")}{" "}
+            <span className="text-xs text-muted-foreground font-normal">/ {p.unit}</span>
           </p>
         )}
       </div>
     </Link>
   );
 }
+
+
+
