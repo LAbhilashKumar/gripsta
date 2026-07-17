@@ -36,7 +36,7 @@ function About() {
             {[
               { i: "🛡️", t: "Premium SS Material", d: "Corrosion-resistant stainless steel with BIS marking — built for long-term durability in every environment." },
               { i: "🔄", t: "50,000+ Cycle Tested", d: "Every product survives 50,000 open/close cycles before leaving our facility." },
-              { i: "🧂", t: "48+ Hrs Salt Spray Tested", d: "Tested against corrosion in harsh salt-spray conditions for guaranteed long-term protection." },
+              { i: "🧂", t: "48 Hrs Salt Spray Tested", d: "Tested against corrosion in harsh salt-spray conditions for guaranteed long-term protection." },
             ].map((c, i) => (
               <Reveal key={c.t} delay={i * 60}>
                 <div className="bg-background border border-border p-8 h-full hover:border-border-hover transition-colors">
