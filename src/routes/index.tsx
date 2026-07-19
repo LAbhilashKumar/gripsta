@@ -502,10 +502,10 @@ function Home() {
   const featured = products.slice(0, 8);
 
   const applications = [
-    { name: "Modern Kitchens", desc: "Soft-close drawers, premium hinges", img: "/applications/modern-kitchens.jpg" },
-    { name: "Wardrobes", desc: "Heavy-duty hinges in multiple finishes", img: "/applications/wardrobes.jpg" },
-    { name: "Office Interiors", desc: "Contract-grade hardware", img: "/applications/office-interiors.jpg" },
-    { name: "Living Room Furniture", desc: "Lid stays & gas springs", img: "/applications/living-room-furniture.jpg" },
+    { name: "Modern Kitchens", desc: "Soft-close drawers, premium hinges", img: "/applications/kitchen.jpeg" },
+    { name: "Wardrobes", desc: "Heavy-duty hinges in multiple finishes", img: "/applications/wardrobe.jpg" },
+    { name: "Office Interiors", desc: "Contract-grade hardware", img: "/applications/offices.jpg" },
+    { name: "Living Room Furniture", desc: "Lid stays & gas springs", img: "/applications/living.jpg" },
   ];
 
   return (
@@ -532,7 +532,7 @@ function Home() {
               { v: 80000, s: "+", l: "Installations" },
               { v: 50000, s: "+", l: "Cycle Tested" },
               { v: 80,    s: "+", l: "Products" },
-              { v: 48,    s: "+", l: "Hrs Salt Spray Tested" },
+              { v: 48,    s: "", l: "Hrs Salt Spray Tested" },
             ].map(s => (
               <div key={s.l}>
                 <Counter to={s.v} suffix={s.s} />
