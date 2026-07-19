@@ -521,7 +521,7 @@ function Home() {
             <span className="text-primary">LAST.</span>
           </h1>
           <p className="mt-8 max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed">
-            Premium hinges, drawer systems, channels and architectural hardware — engineered for precision and built for modern interiors.
+           Premium hinges, drawer channels , kitchen accessories   and architectural hardware -engineered for precision and built for modern interiors.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link to="/products" className="btn-primary">Explore Products →</Link>
